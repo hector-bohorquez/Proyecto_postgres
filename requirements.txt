@@ -1,0 +1,5 @@
+Flask==2.3.3
+psycopg[binary]
+Flask-Session
+flask-wtf
+email-validator
