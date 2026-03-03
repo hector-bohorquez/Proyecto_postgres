@@ -11,18 +11,22 @@ import secrets
 from datetime import datetime, timedelta
 import smtplib
 from email.mime.text import MIMEText
+from dotenv import load_dotenv
 
-# Configuración de la aplicación Flask y PostgreSQL
+# Cargar variables de entorno desde .env
+load_dotenv()
+
+# Configuración de la aplicación Flask
 app = Flask(__name__)
-app.secret_key = 'clave_secreta'
+app.secret_key = os.getenv('SECRET_KEY', 'clave_secreta_por_defecto')
 
 # Configuración PostgreSQL
 DATABASE_CONFIG = {
-    'host': 'localhost',
-    'user': 'postgres',
-    'password': '1234',
-    'dbname': 'bd_app',
-    'port': 5432
+    'host': os.getenv('DB_HOST'),
+    'user': os.getenv('DB_USER'),
+    'password': os.getenv('DB_PASSWORD'),
+    'dbname': os.getenv('DB_NAME'),
+    'port': int(os.getenv('DB_PORT'))
 }
 
 def get_db():
@@ -204,8 +208,8 @@ def enviar_correo_reset(email, token):
     Este enlace expira en 1 hora.
     Si no lo solicitaste, ignora este mensaje."""
 
-    remitente = 'apifood.recovery.key@gmail.com'
-    clave = 'tayg lfsz inon hiqm'
+    remitente = os.getenv('MAIL_USERNAME')
+    clave = os.getenv('MAIL_PASSWORD')
     mensaje = MIMEText(cuerpo)
     mensaje['Subject'] = 'Restablecer tu contraseña'
     mensaje['From'] = remitente
