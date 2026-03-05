@@ -21,18 +21,27 @@ app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'clave_secreta_por_defecto')
 
 # Configuración PostgreSQL
+# render proporciona una única variable DATABASE_URL; si no está definida se usan las otras
 DATABASE_CONFIG = {
     'host': os.getenv('DB_HOST'),
     'user': os.getenv('DB_USER'),
     'password': os.getenv('DB_PASSWORD'),
     'dbname': os.getenv('DB_NAME'),
-    'port': int(os.getenv('DB_PORT'))
+    'port': int(os.getenv('DB_PORT')) if os.getenv('DB_PORT') else None
 }
 
 def get_db():
-    """Obtiene una conexión a la base de datos"""
-    conn = psycopg.connect(**DATABASE_CONFIG)
-    return conn
+    """Obtiene una conexión a la base de datos
+    Si la variable DATABASE_URL está presente (es el formato que devuelve Render
+    para su servicio de Postgres) la usamos directamente. De lo contrario se
+    construye la conexión a partir de los campos individuales.
+    """
+    database_url = os.getenv('DATABASE_URL')
+    if database_url:
+        return psycopg.connect(database_url)
+    # convertir None al tipo esperado (psycopg admite omitir keys con None)
+    cfg = {k: v for k, v in DATABASE_CONFIG.items() if v is not None}
+    return psycopg.connect(**cfg)
 
 # Rutas de la aplicación
 @app.route('/')
